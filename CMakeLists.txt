@@ -14,7 +14,7 @@ if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/CMakeListsUser.txt)
 include(CMakeListsUser.txt)
 endif()
 
-add_executable(morookarc src/main.cpp)
+add_executable(morookarc src/main.cpp src/sbus.cpp src/sbus.h src/outputled.cpp src/outputled.h src/ignition.cpp src/ignition.h src/antenna.cpp src/antenna.h)
 
 add_custom_target(
     PLATFORMIO_BUILD ALL
@@ -93,3 +93,5 @@ add_custom_target(
     COMMAND ${PLATFORMIO_CMD} -f -c clion device list
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
+
+add_executable(Z_DUMMY_TARGET ${SRC_LIST})

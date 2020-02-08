@@ -1,3 +1,6 @@
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "cert-err58-cpp"
+
 #include <Arduino.h>
 #include <Servo.h>
 #include <TinyGPS++.h>
@@ -14,8 +17,11 @@ struct Output {
 };
 
 const double *getChannels();
+
 void handlePassthrough(const double *channels);
+
 void handleAntenna(double compass);
+
 void handleGPS();
 
 Servo leftTrack;
@@ -38,17 +44,16 @@ Servo antennaServo;
 #define ANTENNA_PIN 21
 #define COMPASS_CHANNEL 16
 #define IGNITION_CHANNEL 1
-#define ANTENNA_CALIBRATION TRUE
 
 OutputLed crankRelay(25, 30);
 OutputLed killRelay(29, 20);
 Ignition ignition(VOLTAGE_PROBE_PIN, VOLTAGE_PROBE_FACTOR, &killRelay, &crankRelay, 13, 22, 0.7, 2, 8, 4, 6);
-byte rxLed[] = { 38, 42, 33 };
-SBUS rx(Serial1, {172, 1811});
-byte px4Led[] = { 40, 44, 46 };
-SBUS px4(Serial2, {172, 1811});
-byte piLed[] = { 36, 34, 32 };
-SBUS pi(Serial, {172, 1811});
+byte rxLed[] = {38, 42, 33};
+SBUS rx(Serial1, {172, 1811}); // NOLINT(cppcoreguidelines-interfaces-global-init)
+byte px4Led[] = {40, 44, 46};
+SBUS px4(Serial2, {172, 1811}); // NOLINT(cppcoreguidelines-interfaces-global-init)
+byte piLed[] = {36, 34, 32};
+SBUS pi(Serial, {172, 1811}); // NOLINT(cppcoreguidelines-interfaces-global-init)
 ServoLed rightTrackOutput(&rightTrack, &rightTrackLed);
 ServoLed leftTrackOutput(&leftTrack, &leftTrackLed);
 ServoLed dumpOutput(&dump, &dumpLed);
@@ -63,7 +68,8 @@ const struct Output outputs[] = {
         {.servo = &dumpOutput, .channel = 4, .min = 1000, .max = 2000}
 };
 
-const int outputCount = sizeof(outputs) / sizeof(struct Output);
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "OCUnusedGlobalDeclarationInspection"
 
 void setup() {
     for (int i = 0; i < 54; i++) {
@@ -83,6 +89,11 @@ void setup() {
     Serial3.begin(115200); // GPS
 }
 
+#pragma clang diagnostic pop
+
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "OCUnusedGlobalDeclarationInspection"
+
 void loop() {
     const double *channels = getChannels();
     handlePassthrough(channels);
@@ -91,10 +102,11 @@ void loop() {
     handleGPS();
 }
 
+#pragma clang diagnostic pop
+
 void handlePassthrough(const double *channels) {
-    for (int i = 0; i < outputCount; i++) {
-        const struct Output o = outputs[i];
-        o.servo->writeMicroseconds(o.min + (o.max - o.min) * channels[o.channel - 1]);
+    for (auto o : outputs) {
+        o.servo->writeMicroseconds((int) (o.min + (o.max - o.min) * channels[o.channel - 1]));
     }
 }
 
@@ -105,7 +117,7 @@ void handleAntenna(double compass) {
 void handleGPS() {
     if (Serial3.available()) {
         while (Serial3.available())
-            gps << Serial3.read();
+            gps << (char) Serial3.read();
         antenna.updateGPS();
     }
 }
