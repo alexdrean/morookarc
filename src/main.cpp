@@ -72,17 +72,17 @@ const struct Output outputs[] = {
 #pragma ide diagnostic ignored "OCUnusedGlobalDeclarationInspection"
 
 void setup() {
-    for (int i = 0; i < 54; i++) {
+    for (uint8_t i = 0; i < 54; i++) {
         pinMode(i, OUTPUT);
     }
     analogReference(INTERNAL1V1);
-    leftTrack.attach(LEFT_TRACK_PIN);
-    rightTrack.attach(RIGHT_TRACK_PIN);
-    dump.attach(DUMP_PIN);
-    leftTrackLed.attach(LEFT_TRACK_LED_PIN);
-    rightTrackLed.attach(RIGHT_TRACK_LED_PIN);
-    dumpLed.attach(DUMP_LED_PIN);
-    antennaServo.attach(ANTENNA_PIN);
+    leftTrack.attach(LEFT_TRACK_PIN, 1000, 2000);
+    rightTrack.attach(RIGHT_TRACK_PIN, 1000, 2000);
+    dump.attach(DUMP_PIN, 1000, 2000);
+    leftTrackLed.attach(LEFT_TRACK_LED_PIN, 0, 20000);
+    rightTrackLed.attach(RIGHT_TRACK_LED_PIN, 0, 20000);
+    dumpLed.attach(DUMP_LED_PIN, 0, 20000);
+    antennaServo.attach(ANTENNA_PIN, 1000, 2000);
     rx.begin();
     px4.begin();
     pi.begin(115200, SERIAL_8E1);
@@ -127,33 +127,33 @@ const double *getChannels() {
     px4.read();
     pi.read();
     unsigned long now = millis();
-    bool rxgood = now - rx.lastUpdate < RX_TIMEOUT;
-    bool pigood = now - pi.lastUpdate < RX_TIMEOUT;
-    bool px4good = now - px4.lastUpdate < RX_TIMEOUT;
+    auto rxOk = static_cast<uint8_t>(now - rx.lastUpdate < RX_TIMEOUT);
+    auto piOk = static_cast<uint8_t>(now - pi.lastUpdate < RX_TIMEOUT);
+    auto px4Ok = static_cast<uint8_t>(now - px4.lastUpdate < RX_TIMEOUT);
     Serial.print("rx = ");
-    Serial.println(rxgood);
+    Serial.println(rxOk);
     Serial.print("pi = ");
-    Serial.println(pigood);
+    Serial.println(piOk);
     Serial.print("px = ");
-    Serial.println(px4good);
-    digitalWrite(rxLed[0], !rxgood);
-    digitalWrite(rxLed[1], rxgood);
+    Serial.println(px4Ok);
+    digitalWrite(rxLed[0], static_cast<uint8_t>(!rxOk));
+    digitalWrite(rxLed[1], rxOk);
     digitalWrite(rxLed[2], 0);
-    digitalWrite(piLed[0], !pigood);
-    digitalWrite(piLed[1], pigood);
+    digitalWrite(piLed[0], static_cast<uint8_t>(!piOk));
+    digitalWrite(piLed[1], piOk);
     digitalWrite(piLed[2], 0);
-    digitalWrite(px4Led[0], !px4good);
-    digitalWrite(px4Led[1], px4good);
+    digitalWrite(px4Led[0], static_cast<uint8_t>(!px4Ok));
+    digitalWrite(px4Led[1], px4Ok);
     digitalWrite(px4Led[2], 0);
-    if (rxgood && rx.channels[4] < 0.5) {
+    if (rxOk && rx.channels[4] < 0.5) {
         Serial.println("using direct rx");
         digitalWrite(rxLed[2], 1);
         return rx.channels;
-    } else if (pigood && pi.channels[4] < 0.5) {
+    } else if (piOk && pi.channels[4] < 0.5) {
         Serial.println("using pi");
         digitalWrite(piLed[2], 1);
         return pi.channels;
-    } else if (px4good) {
+    } else if (px4Ok) {
         Serial.println("using px4");
         digitalWrite(px4Led[2], 1);
         return px4.channels;
