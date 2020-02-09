@@ -38,6 +38,14 @@ Ignition::Ignition(uint8_t voltageProbePin,
     this->crankHighVoltage = 0.0;
 }
 
+void Ignition::setup() {
+    pinMode(voltageProbePin, INPUT);
+    pinMode(onLED, OUTPUT);
+    pinMode(offLED, OUTPUT);
+    pinMode(crankLED, OUTPUT);
+    pinMode(errorLED, OUTPUT);
+}
+
 double Ignition::readVoltage() {
     return analogRead(voltageProbePin) / 1024.0 / 1.1 * voltageProbeFactor;
 }
@@ -45,15 +53,15 @@ double Ignition::readVoltage() {
 void Ignition::handle(double killSwitchValue) {
     unsigned long now = millis();
     if (killSwitchValue < KILL_THRESHOLD) {
-        if (lastKillSwitchValue >= KILL_THRESHOLD) killTimer = now + KILL_TIMER;
+        if (state != KILLING) killTimer = now + KILL_TIMER;
         state = KILLING;
-    } else if (now - killTimer < 0) {
+    } else if (now < killTimer) {
         state = KILLING;
     } else {
         double voltage = readVoltage();
         if (state == KILLING) state = OFF;
         if (state == CRANKING) {
-            if (voltage < crankMinVoltage || now - crankTimeout >= 0) state = ERROR;
+            if (voltage < crankMinVoltage || now >= crankTimeout) state = ERROR;
             else if (voltage > crankLowVoltage + crankVoltageRatio * (crankHighVoltage - crankLowVoltage)) state = ON;
             else {
                 if (voltage < crankLowVoltage) crankLowVoltage = voltage;
@@ -62,7 +70,7 @@ void Ignition::handle(double killSwitchValue) {
             if (voltage < minVoltage) state = ERROR;
             else if (killSwitchValue > START_THRESHOLD) {
                 if (lastKillSwitchValue > START_THRESHOLD) {
-                    if (now - crankActivationTimer >= 0) {
+                    if (now >= crankActivationTimer) {
                         state = CRANKING;
                         crankTimeout = now + CRANK_TIMEOUT;
                     }

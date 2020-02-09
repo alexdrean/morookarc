@@ -72,21 +72,24 @@ const struct Output outputs[] = {
 #pragma ide diagnostic ignored "OCUnusedGlobalDeclarationInspection"
 
 void setup() {
-    for (uint8_t i = 0; i < 54; i++) {
-        pinMode(i, OUTPUT);
-    }
     analogReference(INTERNAL1V1);
     leftTrack.attach(LEFT_TRACK_PIN, 1000, 2000);
     rightTrack.attach(RIGHT_TRACK_PIN, 1000, 2000);
     dump.attach(DUMP_PIN, 1000, 2000);
-    leftTrackLed.attach(LEFT_TRACK_LED_PIN, 0, 20000);
-    rightTrackLed.attach(RIGHT_TRACK_LED_PIN, 0, 20000);
-    dumpLed.attach(DUMP_LED_PIN, 0, 20000);
+    leftTrackLed.attach(LEFT_TRACK_LED_PIN);
+    rightTrackLed.attach(RIGHT_TRACK_LED_PIN);
+    dumpLed.attach(DUMP_LED_PIN);
     antennaServo.attach(ANTENNA_PIN, 1000, 2000);
     rx.begin();
     px4.begin();
     pi.begin(115200, SERIAL_8E1);
     Serial3.begin(115200); // GPS
+    ignition.setup();
+    crankRelay.setup();
+    killRelay.setup();
+    for (auto pin : piLed) pinMode(pin, OUTPUT);
+    for (auto pin : px4Led) pinMode(pin, OUTPUT);
+    for (auto pin : rxLed) pinMode(pin, OUTPUT);
 }
 
 #pragma clang diagnostic pop

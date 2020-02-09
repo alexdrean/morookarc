@@ -22,9 +22,11 @@ void SBUS::begin(unsigned long baudrate, uint8_t config) {
 #pragma ide diagnostic ignored "hicpp-signed-bitwise"
 bool SBUS::read() {
     if (!serial->available()) return false;
-    while (serial->available())
-        push(static_cast<uint8_t>(Serial.read()))
+    while (serial->available()) {
+        push(static_cast<uint8_t>(serial->read()))
+    }
     if (get(0) != 0x0F || get(24) != 0x00) return false;
+    lastUpdate = millis();
     double min = endpoints.min;
     double range = endpoints.max - endpoints.min;
     channels[0]  = (((get(0+1)    |get(1+1) <<8)                     & 0x07FF) - min) / range;

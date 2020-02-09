@@ -26,6 +26,7 @@ public:
              uint8_t errorLED
     );
 
+    void setup();
     void handle(double killSwitchValue);
 
 private:

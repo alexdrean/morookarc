@@ -6,6 +6,7 @@
 class OutputLed {
 public:
     OutputLed(uint8_t pin, uint8_t led);
+    void setup();
     void write(bool value);
 
 private:
