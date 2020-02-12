@@ -1,7 +1,7 @@
 #include "ignition.h"
 
-#define KILL_THRESHOLD 0.40
-#define START_THRESHOLD 0.80
+#define KILL_THRESHOLD 0.2
+#define START_THRESHOLD 0.92
 #define KILL_TIMER 3000
 #define CRANK_ACTIVATION_TIMER 3000
 #define CRANK_TIMEOUT 3000
@@ -47,18 +47,19 @@ void Ignition::setup() {
 }
 
 double Ignition::readVoltage() {
-    return analogRead(voltageProbePin) / 1024.0 / 1.1 * voltageProbeFactor;
+    return analogRead(voltageProbePin) / 1024.0 * 1.1 * voltageProbeFactor;
 }
 
 void Ignition::handle(double killSwitchValue) {
     unsigned long now = millis();
+    double voltage = readVoltage();
+    Serial.println(voltage);
     if (killSwitchValue < KILL_THRESHOLD) {
         if (state != KILLING) killTimer = now + KILL_TIMER;
         state = KILLING;
     } else if (now < killTimer) {
         state = KILLING;
     } else {
-        double voltage = readVoltage();
         if (state == KILLING) state = OFF;
         if (state == CRANKING) {
             if (voltage < crankMinVoltage || now >= crankTimeout) state = ERROR;
