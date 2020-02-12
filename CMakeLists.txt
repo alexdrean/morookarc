@@ -14,8 +14,6 @@ if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/CMakeListsUser.txt)
 include(CMakeListsUser.txt)
 endif()
 
-add_executable(morookarc src/main.cpp src/sbus.cpp src/sbus.h src/outputled.cpp src/outputled.h src/ignition.cpp src/ignition.h src/antenna.cpp src/antenna.h)
-
 add_custom_target(
     PLATFORMIO_BUILD ALL
     COMMAND ${PLATFORMIO_CMD} -f -c clion run "$<$<NOT:$<CONFIG:All>>:-e${CMAKE_BUILD_TYPE}>"
@@ -31,12 +29,6 @@ add_custom_target(
 add_custom_target(
     PLATFORMIO_UPLOAD ALL
     COMMAND ${PLATFORMIO_CMD} -f -c clion run --target upload "$<$<NOT:$<CONFIG:All>>:-e${CMAKE_BUILD_TYPE}>"
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-)
-
-add_custom_target(
-    PLATFORMIO_UPLOAD_REMOTE ALL
-    COMMAND ${PLATFORMIO_CMD} -f -c clion remote run --target upload --upload-port /dev/ttyUSB0 "$<$<NOT:$<CONFIG:All>>:-e${CMAKE_BUILD_TYPE}>"
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
 

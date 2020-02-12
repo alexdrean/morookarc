@@ -1,0 +1,6 @@
+
+add_custom_target(
+    PLATFORMIO_UPLOAD_REMOTE ALL
+    COMMAND ${PLATFORMIO_CMD} -f -c clion remote run --target upload --upload-port /dev/ttyUSB0 "$<$<NOT:$<CONFIG:All>>:-e${CMAKE_BUILD_TYPE}>"
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+)
