@@ -15,7 +15,7 @@ static inline double diffAngle(double a, double b) {
 static inline double clampAngle(double angle, double range) {
     if (angle > range) {
         return angle - ceil((angle - range) / 360.0) * 360.0;
-    } else if (angle < range) {
+    } else if (angle < -range) {
         return angle + ceil((range - angle) / 360.0) * 360.0;
     } else {
         return angle;
@@ -58,10 +58,12 @@ void Antenna::update() {
     double targetHeading = course - compass + angleOffset;
     double diff = diffAngle(heading, targetHeading);
     if (fabs(diff) < ANGLE_THRESHOLD) return;
-    commit(clampAngle(heading + diff, range));
+    double newHeading = clampAngle(heading + diff, range);
+    commit(newHeading);
 }
 
 void Antenna::commit(double newHeading) {
     this->heading = newHeading;
-    servo->writeMicroseconds((int) (servoBase + servoFactor * newHeading));
+    int output = static_cast<int>(servoBase + servoFactor * newHeading);
+    servo->writeMicroseconds(output);
 }
